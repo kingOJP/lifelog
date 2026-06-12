@@ -1,0 +1,29 @@
+.dashboard {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.week-header {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding-bottom: 4px;
+}
+
+.week-label {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.week-progress {
+  font-size: 14px;
+  color: var(--text-muted);
+}
+
+.day-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}

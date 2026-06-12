@@ -1,3 +1,4 @@
+import Dashboard from './components/Dashboard'
 import './App.css'
 
 function App() {
@@ -7,7 +8,7 @@ function App() {
         <h1>LiftLog</h1>
       </header>
       <main className="app-main">
-        <p className="placeholder">Dashboard coming in Milestone 2</p>
+        <Dashboard />
       </main>
     </div>
   )
