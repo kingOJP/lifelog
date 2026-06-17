@@ -4,11 +4,12 @@ import './DayCard.css';
 interface Props {
   day: WorkoutDay;
   done: boolean;
+  onClick: () => void;
 }
 
-export default function DayCard({ day, done }: Props) {
+export default function DayCard({ day, done, onClick }: Props) {
   return (
-    <div className={`day-card${done ? ' done' : ''}`}>
+    <div className={`day-card${done ? ' done' : ''}`} onClick={onClick}>
       <div className="day-card-body">
         <div className="day-number">{day.label}</div>
         <div className="day-muscles">{day.muscleGroups}</div>

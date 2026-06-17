@@ -1,19 +1,22 @@
-import { PROGRAM, PROGRAM_START } from '../data/program';
+import { useState, useEffect } from 'react';
+import { PROGRAM, getWeekNumber } from '../data/program';
+import { getCompletedSessionsForWeek } from '../db/database';
 import DayCard from './DayCard';
 import './Dashboard.css';
 
-function getWeekNumber(): number {
-  const now = new Date();
-  const start = new Date(PROGRAM_START);
-  start.setHours(0, 0, 0, 0);
-  const msPerWeek = 7 * 24 * 60 * 60 * 1000;
-  return Math.max(1, Math.floor((now.getTime() - start.getTime()) / msPerWeek) + 1);
+interface Props {
+  onStartWorkout: (dayId: number) => void;
 }
 
-export default function Dashboard() {
+export default function Dashboard({ onStartWorkout }: Props) {
   const weekNumber = getWeekNumber();
-  // Will be populated from IndexedDB in Milestone 3
-  const completedDayIds: number[] = [];
+  const [completedDayIds, setCompletedDayIds] = useState<number[]>([]);
+
+  useEffect(() => {
+    getCompletedSessionsForWeek(weekNumber).then(sessions => {
+      setCompletedDayIds(sessions.map(s => s.dayId));
+    });
+  }, [weekNumber]);
 
   return (
     <div className="dashboard">
@@ -27,6 +30,7 @@ export default function Dashboard() {
             key={day.id}
             day={day}
             done={completedDayIds.includes(day.id)}
+            onClick={() => onStartWorkout(day.id)}
           />
         ))}
       </div>

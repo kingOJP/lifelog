@@ -69,6 +69,13 @@ export const PROGRAM: WorkoutDay[] = [
   },
 ];
 
-// First Monday of your current training block.
-// We'll make this user-configurable in a later milestone.
+// First Monday of your current training block — make this user-configurable later
 export const PROGRAM_START = new Date('2026-06-09');
+
+export function getWeekNumber(): number {
+  const now = new Date();
+  const start = new Date(PROGRAM_START);
+  start.setHours(0, 0, 0, 0);
+  const msPerWeek = 7 * 24 * 60 * 60 * 1000;
+  return Math.max(1, Math.floor((now.getTime() - start.getTime()) / msPerWeek) + 1);
+}
