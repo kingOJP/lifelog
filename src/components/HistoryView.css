@@ -1,0 +1,153 @@
+.history-view {
+  display: flex;
+  flex-direction: column;
+  min-height: 100%;
+}
+
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: calc(14px + env(safe-area-inset-top)) 16px 14px;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--bg);
+  z-index: 10;
+}
+
+.history-title {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+/* reuse from WorkoutView */
+.back-btn {
+  background: none;
+  border: none;
+  color: var(--text);
+  font-size: 22px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 8px;
+  line-height: 1;
+  flex-shrink: 0;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.back-btn:active {
+  background: var(--bg-card);
+}
+
+.history-list {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: calc(16px + env(safe-area-inset-bottom));
+}
+
+.history-empty {
+  color: var(--text-muted);
+  font-size: 15px;
+  text-align: center;
+  margin-top: 40px;
+}
+
+/* ── Session card ── */
+.history-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.history-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px;
+  gap: 8px;
+}
+
+.history-card-left {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.history-date {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--purple);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.history-day-label {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.history-summary {
+  font-size: 13px;
+  color: var(--text-muted);
+}
+
+.history-chevron {
+  font-size: 11px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+/* ── Expanded detail ── */
+.history-detail {
+  border-top: 1px solid var(--border);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.history-exercise {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.history-ex-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.history-sets {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.history-set-row {
+  display: flex;
+  gap: 10px;
+  font-size: 13px;
+}
+
+.history-set-num {
+  width: 44px;
+  color: var(--text-muted);
+}
+
+.history-set-weight {
+  font-weight: 600;
+  color: var(--text);
+  min-width: 60px;
+}
+
+.history-set-reps {
+  color: var(--text-muted);
+}

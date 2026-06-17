@@ -27,3 +27,21 @@
   flex-direction: column;
   gap: 12px;
 }
+
+.history-btn {
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 12px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.15s;
+}
+
+.history-btn:active {
+  background: var(--bg-card);
+}

@@ -124,3 +124,23 @@ export async function getCompletedSessionsForWeek(weekNumber: number): Promise<S
   );
   return all.filter(s => s.completedAt != null);
 }
+
+export async function getAllCompletedSessions(): Promise<Session[]> {
+  const db = await openDB();
+  const all = await idbReq<Session[]>(
+    db.transaction('sessions', 'readonly').objectStore('sessions').getAll(),
+  );
+  return all
+    .filter(s => s.completedAt != null)
+    .sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
+}
+
+export async function getSetLogsForSession(sessionId: number): Promise<SetLog[]> {
+  const db = await openDB();
+  return idbReq<SetLog[]>(
+    db.transaction('setLogs', 'readonly')
+      .objectStore('setLogs')
+      .index('sessionId')
+      .getAll(sessionId),
+  );
+}

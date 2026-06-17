@@ -1,17 +1,17 @@
 .exercise-card {
   background: var(--bg-card);
   border: 1px solid var(--border);
+  border-left: 3px solid transparent;
   border-radius: 12px;
   padding: 14px;
   display: flex;
   flex-direction: column;
   gap: 12px;
-  transition: opacity 0.2s;
+  transition: border-color 0.2s;
 }
 
-.exercise-card.ex-done {
-  opacity: 0.55;
-  border-left: 3px solid var(--green);
+.exercise-card.rated {
+  border-left-color: var(--green);
 }
 
 /* ── Header ── */
@@ -49,6 +49,21 @@
   font-size: 13px;
 }
 
+.set-num {
+  width: 44px;
+  color: var(--text-muted);
+}
+
+.set-weight {
+  font-weight: 600;
+  color: var(--text);
+  min-width: 60px;
+}
+
+.set-reps {
+  color: var(--text-muted);
+}
+
 .delete-set-btn {
   margin-left: auto;
   background: none;
@@ -65,21 +80,6 @@
 .delete-set-btn:active {
   color: var(--red);
   background: rgba(232, 85, 85, 0.1);
-}
-
-.set-num {
-  width: 44px;
-  color: var(--text-muted);
-}
-
-.set-weight {
-  font-weight: 600;
-  color: var(--text);
-  min-width: 60px;
-}
-
-.set-reps {
-  color: var(--text-muted);
 }
 
 /* ── Inputs ── */
@@ -178,54 +178,29 @@
 
 .diff-btn {
   flex: 1;
-  border: none;
+  border: 1.5px solid transparent;
   border-radius: 8px;
   font-size: 13px;
   font-weight: 700;
   padding: 9px 4px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.15s;
+  transition: opacity 0.15s, border-color 0.15s;
 }
 
 .diff-btn:active {
   opacity: 0.75;
 }
 
-.diff-easy,
-.diff-badge.diff-easy {
-  background: rgba(29, 158, 117, 0.15);
-  color: var(--green);
+/* Dim unselected buttons once a selection is made */
+.diff-buttons.has-selection .diff-btn:not(.selected) {
+  opacity: 0.35;
 }
 
-.diff-medium,
-.diff-badge.diff-medium {
-  background: rgba(124, 114, 232, 0.18);
-  color: var(--purple);
+.diff-btn.selected {
+  border-color: currentColor;
 }
 
-.diff-hard,
-.diff-badge.diff-hard {
-  background: rgba(232, 85, 85, 0.15);
-  color: var(--red);
-}
-
-/* ── Done summary ── */
-.ex-done-row {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.diff-badge {
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  padding: 4px 10px;
-  border-radius: 6px;
-}
-
-.ex-done-sets {
-  font-size: 13px;
-  color: var(--text-muted);
-}
+.diff-easy { background: rgba(29, 158, 117, 0.15);  color: var(--green);  }
+.diff-medium { background: rgba(124, 114, 232, 0.18); color: var(--purple); }
+.diff-hard { background: rgba(232, 85, 85, 0.15);   color: var(--red);    }

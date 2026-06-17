@@ -80,6 +80,14 @@ export const RETIRED_EXERCISES: Exercise[] = [
   { id: 'lat-pull-down',            name: 'Lat Pull Down',                sets: 3, repLow: 10, repHigh: 12 },
 ];
 
+// Flat lookup map built once at module load — used by history view to resolve exercise names
+const _exerciseMap = new Map<string, string>(
+  [...PROGRAM.flatMap(d => d.exercises), ...RETIRED_EXERCISES].map(e => [e.id, e.name]),
+);
+export function getExerciseName(id: string): string {
+  return _exerciseMap.get(id) ?? id;
+}
+
 // First Monday of your current training block — make this user-configurable later
 export const PROGRAM_START = new Date('2026-06-09');
 

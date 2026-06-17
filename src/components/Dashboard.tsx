@@ -6,9 +6,10 @@ import './Dashboard.css';
 
 interface Props {
   onStartWorkout: (dayId: number) => void;
+  onViewHistory: () => void;
 }
 
-export default function Dashboard({ onStartWorkout }: Props) {
+export default function Dashboard({ onStartWorkout, onViewHistory }: Props) {
   const weekNumber = getWeekNumber();
   const [completedDayIds, setCompletedDayIds] = useState<number[]>([]);
 
@@ -34,6 +35,9 @@ export default function Dashboard({ onStartWorkout }: Props) {
           />
         ))}
       </div>
+      <button className="history-btn" onClick={onViewHistory}>
+        View History
+      </button>
     </div>
   );
 }

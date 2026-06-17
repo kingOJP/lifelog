@@ -22,7 +22,6 @@ export default function ExerciseCard({ exercise, sets, difficulty, onLogSet, onD
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState('');
 
-  const isDone = difficulty !== null;
   const targetLabel = `${exercise.sets} × ${exercise.repLow}–${exercise.repHigh}`;
   const nextSetNum = sets.length + 1;
 
@@ -32,7 +31,7 @@ export default function ExerciseCard({ exercise, sets, difficulty, onLogSet, onD
     if (!isFinite(w) || !isFinite(r) || w <= 0 || r <= 0) return;
     onLogSet(w, r);
     setReps('');
-    // Keep weight pre-filled for the next set
+    // Keep weight pre-filled for next set
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
@@ -40,7 +39,7 @@ export default function ExerciseCard({ exercise, sets, difficulty, onLogSet, onD
   }
 
   return (
-    <div className={`exercise-card${isDone ? ' ex-done' : ''}`}>
+    <div className={`exercise-card${difficulty ? ' rated' : ''}`}>
       <div className="ex-header">
         <span className="ex-name">{exercise.name}</span>
         <span className="ex-target">{targetLabel}</span>
@@ -65,66 +64,55 @@ export default function ExerciseCard({ exercise, sets, difficulty, onLogSet, onD
         </div>
       )}
 
-      {!isDone && (
-        <>
-          <div className="set-inputs">
-            <div className="input-row">
-              <div className="weight-wrap">
-                <input
-                  className="num-input"
-                  type="number"
-                  inputMode="decimal"
-                  placeholder="Weight"
-                  value={weight}
-                  onChange={e => setWeight(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-                <span className="input-unit">lbs</span>
-              </div>
-              <div className="reps-wrap">
-                <input
-                  className="num-input"
-                  type="number"
-                  inputMode="numeric"
-                  placeholder="Reps"
-                  value={reps}
-                  onChange={e => setReps(e.target.value)}
-                  onKeyDown={handleKeyDown}
-                />
-              </div>
-            </div>
-            <button
-              className="log-btn"
-              disabled={!weight || !reps}
-              onClick={handleLogSet}
-            >
-              Log Set {nextSetNum}
-            </button>
+      <div className="set-inputs">
+        <div className="input-row">
+          <div className="weight-wrap">
+            <input
+              className="num-input"
+              type="number"
+              inputMode="decimal"
+              placeholder="Weight"
+              value={weight}
+              onChange={e => setWeight(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+            <span className="input-unit">lbs</span>
           </div>
+          <div className="reps-wrap">
+            <input
+              className="num-input"
+              type="number"
+              inputMode="numeric"
+              placeholder="Reps"
+              value={reps}
+              onChange={e => setReps(e.target.value)}
+              onKeyDown={handleKeyDown}
+            />
+          </div>
+        </div>
+        <button
+          className="log-btn"
+          disabled={!weight || !reps}
+          onClick={handleLogSet}
+        >
+          Log Set {nextSetNum}
+        </button>
+      </div>
 
-          {sets.length > 0 && (
-            <div className="difficulty-section">
-              <span className="difficulty-label">How was that?</span>
-              <div className="diff-buttons">
-                {(['easy', 'medium', 'hard'] as Difficulty[]).map(d => (
-                  <button
-                    key={d}
-                    className={`diff-btn diff-${d}`}
-                    onClick={() => onRateDifficulty(d)}
-                  >
-                    {DIFFICULTY_LABELS[d]}
-                  </button>
-                ))}
-              </div>
-            </div>
-          )}
-        </>
-      )}
-
-      {isDone && (
-        <div className="ex-done-row">
-          <span className={`diff-badge diff-${difficulty}`}>{DIFFICULTY_LABELS[difficulty]}</span>
-          <span className="ex-done-sets">{sets.length} set{sets.length !== 1 ? 's' : ''} logged</span>
+      {sets.length > 0 && (
+        <div className="difficulty-section">
+          <span className="difficulty-label">How was that?</span>
+          <div className={`diff-buttons${difficulty ? ' has-selection' : ''}`}>
+            {(['easy', 'medium', 'hard'] as Difficulty[]).map(d => (
+              <button
+                key={d}
+                className={`diff-btn diff-${d}${difficulty === d ? ' selected' : ''}`}
+                onClick={() => onRateDifficulty(d)}
+              >
+                {DIFFICULTY_LABELS[d]}
+              </button>
+            ))}
+          </div>
         </div>
       )}
     </div>
