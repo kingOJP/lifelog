@@ -64,6 +64,14 @@
   color: var(--text-muted);
 }
 
+.set-row {
+  cursor: pointer;
+}
+
+.set-row:active:not(.editing) {
+  opacity: 0.7;
+}
+
 .delete-set-btn {
   margin-left: auto;
   background: none;
@@ -80,6 +88,56 @@
 .delete-set-btn:active {
   color: var(--red);
   background: rgba(232, 85, 85, 0.1);
+}
+
+/* ── Inline set editing ── */
+.set-row.editing {
+  gap: 6px;
+  cursor: default;
+}
+
+.inline-field {
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.inline-input {
+  width: 52px;
+  background: var(--bg-input);
+  border: 1px solid var(--purple);
+  border-radius: 6px;
+  color: var(--text);
+  font-size: 14px;
+  padding: 4px 6px;
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+}
+
+.inline-unit {
+  font-size: 11px;
+  color: var(--text-muted);
+}
+
+.edit-confirm-btn,
+.edit-cancel-btn {
+  background: none;
+  border: none;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 2px 5px;
+  border-radius: 4px;
+  -webkit-tap-highlight-color: transparent;
+  line-height: 1;
+}
+
+.edit-confirm-btn {
+  color: var(--green);
+}
+
+.edit-cancel-btn {
+  color: var(--text-muted);
 }
 
 /* ── Inputs ── */

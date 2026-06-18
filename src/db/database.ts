@@ -144,3 +144,43 @@ export async function getSetLogsForSession(sessionId: number): Promise<SetLog[]>
       .getAll(sessionId),
   );
 }
+
+export async function getExerciseLogsForSession(sessionId: number): Promise<ExerciseLog[]> {
+  const db = await openDB();
+  return idbReq<ExerciseLog[]>(
+    db.transaction('exerciseLogs', 'readonly')
+      .objectStore('exerciseLogs')
+      .index('sessionId')
+      .getAll(sessionId),
+  );
+}
+
+export async function deleteSetLogsForSession(sessionId: number): Promise<void> {
+  const db = await openDB();
+  const logs = await idbReq<SetLog[]>(
+    db.transaction('setLogs', 'readonly')
+      .objectStore('setLogs')
+      .index('sessionId')
+      .getAll(sessionId),
+  );
+  if (logs.length === 0) return;
+  const store = db.transaction('setLogs', 'readwrite').objectStore('setLogs');
+  for (const log of logs) {
+    await idbReq(store.delete(log.id!));
+  }
+}
+
+export async function deleteExerciseLogsForSession(sessionId: number): Promise<void> {
+  const db = await openDB();
+  const logs = await idbReq<ExerciseLog[]>(
+    db.transaction('exerciseLogs', 'readonly')
+      .objectStore('exerciseLogs')
+      .index('sessionId')
+      .getAll(sessionId),
+  );
+  if (logs.length === 0) return;
+  const store = db.transaction('exerciseLogs', 'readwrite').objectStore('exerciseLogs');
+  for (const log of logs) {
+    await idbReq(store.delete(log.id!));
+  }
+}

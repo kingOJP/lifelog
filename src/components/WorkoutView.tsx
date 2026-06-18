@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { WorkoutDay } from '../data/program';
 import { getWeekNumber } from '../data/program';
 import {
@@ -6,6 +6,10 @@ import {
   completeSession,
   addSetLog,
   saveExerciseDifficulty,
+  getSetLogsForSession,
+  getExerciseLogsForSession,
+  deleteSetLogsForSession,
+  deleteExerciseLogsForSession,
 } from '../db/database';
 import type { Difficulty } from '../db/database';
 import ExerciseCard from './ExerciseCard';
@@ -13,21 +17,55 @@ import './WorkoutView.css';
 
 interface Props {
   day: WorkoutDay;
+  existingSessionId?: number;
   onBack: () => void;
   onComplete: () => void;
 }
 
 type SetEntry = { weight: number; reps: number };
 
-export default function WorkoutView({ day, onBack, onComplete }: Props) {
+export default function WorkoutView({ day, existingSessionId, onBack, onComplete }: Props) {
+  const isEditMode = existingSessionId !== undefined;
   const [sets, setSets] = useState<Record<string, SetEntry[]>>({});
   const [difficulties, setDifficulties] = useState<Record<string, Difficulty>>({});
   const [finishing, setFinishing] = useState(false);
+  const [loading, setLoading] = useState(isEditMode);
+
+  // When editing a past session, pre-populate from DB
+  useEffect(() => {
+    if (!existingSessionId) return;
+    Promise.all([
+      getSetLogsForSession(existingSessionId),
+      getExerciseLogsForSession(existingSessionId),
+    ]).then(([setLogs, exerciseLogs]) => {
+      const groupedSets: Record<string, SetEntry[]> = {};
+      for (const sl of setLogs) {
+        (groupedSets[sl.exerciseId] ??= []).push({ weight: sl.weight, reps: sl.reps });
+      }
+      setSets(groupedSets);
+
+      const diffs: Record<string, Difficulty> = {};
+      for (const el of exerciseLogs) {
+        diffs[el.exerciseId] = el.difficulty;
+      }
+      setDifficulties(diffs);
+      setLoading(false);
+    });
+  }, [existingSessionId]);
 
   function handleLogSet(exerciseId: string, weight: number, reps: number) {
     setSets(prev => ({
       ...prev,
       [exerciseId]: [...(prev[exerciseId] ?? []), { weight, reps }],
+    }));
+  }
+
+  function handleEditSet(exerciseId: string, index: number, weight: number, reps: number) {
+    setSets(prev => ({
+      ...prev,
+      [exerciseId]: (prev[exerciseId] ?? []).map((s, i) =>
+        i === index ? { weight, reps } : s
+      ),
     }));
   }
 
@@ -38,38 +76,57 @@ export default function WorkoutView({ day, onBack, onComplete }: Props) {
     }));
   }
 
-  function handleRateDifficulty(exerciseId: string, difficulty: Difficulty) {
-    setDifficulties(prev => ({ ...prev, [exerciseId]: difficulty }));
+  function handleRateDifficulty(exerciseId: string, d: Difficulty) {
+    setDifficulties(prev => ({ ...prev, [exerciseId]: d }));
   }
 
   async function handleFinish() {
     if (finishing) return;
     setFinishing(true);
 
-    const sid = await createSession(day.id, getWeekNumber());
+    const sid = isEditMode
+      ? existingSessionId
+      : await createSession(day.id, getWeekNumber());
+
+    if (isEditMode) {
+      await deleteSetLogsForSession(sid);
+      await deleteExerciseLogsForSession(sid);
+    }
 
     for (const [exerciseId, exerciseSets] of Object.entries(sets)) {
       for (let i = 0; i < exerciseSets.length; i++) {
         await addSetLog(sid, exerciseId, i + 1, exerciseSets[i].weight, exerciseSets[i].reps);
       }
     }
-
     for (const [exerciseId, difficulty] of Object.entries(difficulties)) {
       await saveExerciseDifficulty(sid, exerciseId, difficulty);
     }
 
-    await completeSession(sid);
+    if (!isEditMode) await completeSession(sid);
     onComplete();
   }
 
   const totalSets = Object.values(sets).reduce((sum, s) => sum + s.length, 0);
 
+  if (loading) {
+    return (
+      <div className="workout-view">
+        <header className="workout-header">
+          <button className="back-btn" onClick={onBack}>&#8592;</button>
+          <div className="workout-title">
+            <span className="workout-day-label">{day.label}</span>
+            <span className="workout-muscles">{day.muscleGroups}</span>
+          </div>
+        </header>
+        <div className="workout-loading">Loading…</div>
+      </div>
+    );
+  }
+
   return (
     <div className="workout-view">
       <header className="workout-header">
-        <button className="back-btn" onClick={onBack} aria-label="Back to dashboard">
-          &#8592;
-        </button>
+        <button className="back-btn" onClick={onBack} aria-label="Back">&#8592;</button>
         <div className="workout-title">
           <span className="workout-day-label">{day.label}</span>
           <span className="workout-muscles">{day.muscleGroups}</span>
@@ -84,8 +141,9 @@ export default function WorkoutView({ day, onBack, onComplete }: Props) {
             sets={sets[ex.id] ?? []}
             difficulty={difficulties[ex.id] ?? null}
             onLogSet={(w, r) => handleLogSet(ex.id, w, r)}
-            onDeleteSet={(i) => handleDeleteSet(ex.id, i)}
-            onRateDifficulty={(d) => handleRateDifficulty(ex.id, d)}
+            onEditSet={(i, w, r) => handleEditSet(ex.id, i, w, r)}
+            onDeleteSet={i => handleDeleteSet(ex.id, i)}
+            onRateDifficulty={d => handleRateDifficulty(ex.id, d)}
           />
         ))}
       </div>
@@ -96,7 +154,7 @@ export default function WorkoutView({ day, onBack, onComplete }: Props) {
           disabled={totalSets === 0 || finishing}
           onClick={handleFinish}
         >
-          {finishing ? 'Saving…' : 'Finish Workout'}
+          {finishing ? 'Saving…' : isEditMode ? 'Save Changes' : 'Finish Workout'}
         </button>
       </div>
     </div>

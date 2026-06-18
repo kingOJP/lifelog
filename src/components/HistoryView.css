@@ -151,3 +151,23 @@
 .history-set-reps {
   color: var(--text-muted);
 }
+
+.edit-session-btn {
+  margin-top: 4px;
+  width: 100%;
+  background: none;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 600;
+  padding: 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: border-color 0.15s, color 0.15s;
+}
+
+.edit-session-btn:active {
+  border-color: var(--purple);
+  color: var(--purple);
+}

@@ -1,11 +1,14 @@
 import { useState, useEffect } from 'react';
-import { PROGRAM, getExerciseName } from '../data/program';
+import type { WorkoutDay } from '../data/program';
+import { getExerciseName } from '../data/programStore';
 import { getAllCompletedSessions, getSetLogsForSession } from '../db/database';
 import type { Session, SetLog } from '../db/database';
 import './HistoryView.css';
 
 interface Props {
+  program: WorkoutDay[];
   onBack: () => void;
+  onEditSession: (sessionId: number, dayId: number) => void;
 }
 
 interface HistoryEntry {
@@ -23,7 +26,7 @@ function formatDate(ts: number): string {
   return d.toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' });
 }
 
-export default function HistoryView({ onBack }: Props) {
+export default function HistoryView({ program, onBack, onEditSession }: Props) {
   const [entries, setEntries] = useState<HistoryEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<number | null>(null);
@@ -46,9 +49,7 @@ export default function HistoryView({ onBack }: Props) {
   return (
     <div className="history-view">
       <header className="history-header">
-        <button className="back-btn" onClick={onBack} aria-label="Back to dashboard">
-          &#8592;
-        </button>
+        <button className="back-btn" onClick={onBack} aria-label="Back to dashboard">&#8592;</button>
         <span className="history-title">History</span>
       </header>
 
@@ -60,11 +61,9 @@ export default function HistoryView({ onBack }: Props) {
         )}
 
         {entries.map(({ session, sets }) => {
-          const day = PROGRAM.find(d => d.id === session.dayId);
+          const day = program.find(d => d.id === session.dayId);
           const isExpanded = expandedId === session.id;
-          const totalSets = sets.length;
 
-          // Group sets by exercise, preserving day order
           const exerciseOrder = day?.exercises.map(e => e.id) ?? [];
           const grouped = sets.reduce<Record<string, SetLog[]>>((acc, s) => {
             (acc[s.exerciseId] ??= []).push(s);
@@ -88,7 +87,7 @@ export default function HistoryView({ onBack }: Props) {
                     {day ? `${day.label} — ${day.muscleGroups}` : `Day ${session.dayId}`}
                   </span>
                   <span className="history-summary">
-                    {orderedExercises.length} exercise{orderedExercises.length !== 1 ? 's' : ''} · {totalSets} sets
+                    {orderedExercises.length} exercise{orderedExercises.length !== 1 ? 's' : ''} · {sets.length} sets
                   </span>
                 </div>
                 <span className="history-chevron">{isExpanded ? '▲' : '▼'}</span>
@@ -110,6 +109,16 @@ export default function HistoryView({ onBack }: Props) {
                       </div>
                     </div>
                   ))}
+
+                  <button
+                    className="edit-session-btn"
+                    onClick={e => {
+                      e.stopPropagation();
+                      onEditSession(session.id!, session.dayId);
+                    }}
+                  >
+                    Edit Session
+                  </button>
                 </div>
               )}
             </div>

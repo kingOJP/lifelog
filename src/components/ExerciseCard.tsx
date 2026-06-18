@@ -8,6 +8,7 @@ interface Props {
   sets: Array<{ weight: number; reps: number }>;
   difficulty: Difficulty | null;
   onLogSet: (weight: number, reps: number) => void;
+  onEditSet: (index: number, weight: number, reps: number) => void;
   onDeleteSet: (index: number) => void;
   onRateDifficulty: (d: Difficulty) => void;
 }
@@ -18,9 +19,15 @@ const DIFFICULTY_LABELS: Record<Difficulty, string> = {
   hard: 'Hard',
 };
 
-export default function ExerciseCard({ exercise, sets, difficulty, onLogSet, onDeleteSet, onRateDifficulty }: Props) {
+export default function ExerciseCard({
+  exercise, sets, difficulty,
+  onLogSet, onEditSet, onDeleteSet, onRateDifficulty,
+}: Props) {
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState('');
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const [editWeight, setEditWeight] = useState('');
+  const [editReps, setEditReps] = useState('');
 
   const targetLabel = `${exercise.sets} × ${exercise.repLow}–${exercise.repHigh}`;
   const nextSetNum = sets.length + 1;
@@ -31,11 +38,35 @@ export default function ExerciseCard({ exercise, sets, difficulty, onLogSet, onD
     if (!isFinite(w) || !isFinite(r) || w <= 0 || r <= 0) return;
     onLogSet(w, r);
     setReps('');
-    // Keep weight pre-filled for next set
+  }
+
+  function startEdit(index: number) {
+    setEditingIndex(index);
+    setEditWeight(String(sets[index].weight));
+    setEditReps(String(sets[index].reps));
+  }
+
+  function confirmEdit() {
+    if (editingIndex === null) return;
+    const w = parseFloat(editWeight);
+    const r = parseInt(editReps, 10);
+    if (isFinite(w) && isFinite(r) && w > 0 && r > 0) {
+      onEditSet(editingIndex, w, r);
+    }
+    setEditingIndex(null);
+  }
+
+  function cancelEdit() {
+    setEditingIndex(null);
   }
 
   function handleKeyDown(e: React.KeyboardEvent) {
     if (e.key === 'Enter') handleLogSet();
+  }
+
+  function handleEditKeyDown(e: React.KeyboardEvent) {
+    if (e.key === 'Enter') confirmEdit();
+    if (e.key === 'Escape') cancelEdit();
   }
 
   return (
@@ -47,20 +78,51 @@ export default function ExerciseCard({ exercise, sets, difficulty, onLogSet, onD
 
       {sets.length > 0 && (
         <div className="set-log">
-          {sets.map((s, i) => (
-            <div key={i} className="set-row">
-              <span className="set-num">Set {i + 1}</span>
-              <span className="set-weight">{s.weight} lbs</span>
-              <span className="set-reps">{s.reps} reps</span>
-              <button
-                className="delete-set-btn"
-                onClick={() => onDeleteSet(i)}
-                aria-label={`Delete set ${i + 1}`}
-              >
-                ×
-              </button>
-            </div>
-          ))}
+          {sets.map((s, i) =>
+            editingIndex === i ? (
+              <div key={i} className="set-row editing">
+                <span className="set-num">Set {i + 1}</span>
+                <div className="inline-field">
+                  <input
+                    className="inline-input"
+                    type="number"
+                    inputMode="decimal"
+                    value={editWeight}
+                    onChange={e => setEditWeight(e.target.value)}
+                    onKeyDown={handleEditKeyDown}
+                    autoFocus
+                  />
+                  <span className="inline-unit">lbs</span>
+                </div>
+                <div className="inline-field">
+                  <input
+                    className="inline-input"
+                    type="number"
+                    inputMode="numeric"
+                    value={editReps}
+                    onChange={e => setEditReps(e.target.value)}
+                    onKeyDown={handleEditKeyDown}
+                  />
+                  <span className="inline-unit">rp</span>
+                </div>
+                <button className="edit-confirm-btn" onClick={confirmEdit}>✓</button>
+                <button className="edit-cancel-btn" onClick={cancelEdit}>✗</button>
+              </div>
+            ) : (
+              <div key={i} className="set-row" onClick={() => startEdit(i)}>
+                <span className="set-num">Set {i + 1}</span>
+                <span className="set-weight">{s.weight} lbs</span>
+                <span className="set-reps">{s.reps} reps</span>
+                <button
+                  className="delete-set-btn"
+                  onClick={e => { e.stopPropagation(); onDeleteSet(i); }}
+                  aria-label={`Delete set ${i + 1}`}
+                >
+                  ×
+                </button>
+              </div>
+            )
+          )}
         </div>
       )}
 
@@ -90,11 +152,7 @@ export default function ExerciseCard({ exercise, sets, difficulty, onLogSet, onD
             />
           </div>
         </div>
-        <button
-          className="log-btn"
-          disabled={!weight || !reps}
-          onClick={handleLogSet}
-        >
+        <button className="log-btn" disabled={!weight || !reps} onClick={handleLogSet}>
           Log Set {nextSetNum}
         </button>
       </div>
