@@ -135,6 +135,16 @@ export async function getAllCompletedSessions(): Promise<Session[]> {
     .sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0));
 }
 
+export async function getLastCompletedSessionForDay(dayId: number): Promise<Session | undefined> {
+  const db = await openDB();
+  const all = await idbReq<Session[]>(
+    db.transaction('sessions', 'readonly').objectStore('sessions').getAll(),
+  );
+  return all
+    .filter(s => s.dayId === dayId && s.completedAt != null)
+    .sort((a, b) => (b.completedAt ?? 0) - (a.completedAt ?? 0))[0];
+}
+
 export async function getSetLogsForSession(sessionId: number): Promise<SetLog[]> {
   const db = await openDB();
   return idbReq<SetLog[]>(

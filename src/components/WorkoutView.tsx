@@ -7,7 +7,9 @@ import {
   addSetLog,
   getSetLogsForSession,
   deleteSetLogsForSession,
+  getLastCompletedSessionForDay,
 } from '../db/database';
+import { calculateRecommendedWeight } from '../data/recommendations';
 import ExerciseCard from './ExerciseCard';
 import './WorkoutView.css';
 
@@ -23,8 +25,24 @@ type SetEntry = { weight: number; reps: number };
 export default function WorkoutView({ day, existingSessionId, onBack, onComplete }: Props) {
   const isEditMode = existingSessionId !== undefined;
   const [sets, setSets] = useState<Record<string, SetEntry[]>>({});
+  const [recommendedWeights, setRecommendedWeights] = useState<Record<string, number>>({});
   const [finishing, setFinishing] = useState(false);
   const [loading, setLoading] = useState(isEditMode);
+
+  useEffect(() => {
+    if (isEditMode) return;
+    getLastCompletedSessionForDay(day.id).then(async session => {
+      if (!session?.id) return;
+      const setLogs = await getSetLogsForSession(session.id);
+      const recs: Record<string, number> = {};
+      for (const ex of day.exercises) {
+        const exSets = setLogs.filter(s => s.exerciseId === ex.id);
+        const rec = calculateRecommendedWeight(exSets, ex);
+        if (rec != null) recs[ex.id] = rec;
+      }
+      setRecommendedWeights(recs);
+    });
+  }, [day.id, isEditMode]);
 
   useEffect(() => {
     if (!existingSessionId) return;
@@ -116,6 +134,7 @@ export default function WorkoutView({ day, existingSessionId, onBack, onComplete
             key={ex.id}
             exercise={ex}
             sets={sets[ex.id] ?? []}
+            recommendedWeight={recommendedWeights[ex.id]}
             onLogSet={(w, r) => handleLogSet(ex.id, w, r)}
             onEditSet={(i, w, r) => handleEditSet(ex.id, i, w, r)}
             onDeleteSet={i => handleDeleteSet(ex.id, i)}

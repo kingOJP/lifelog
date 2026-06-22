@@ -1,17 +1,18 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { Exercise } from '../data/program';
 import './ExerciseCard.css';
 
 interface Props {
   exercise: Exercise;
   sets: Array<{ weight: number; reps: number }>;
+  recommendedWeight?: number;
   onLogSet: (weight: number, reps: number) => void;
   onEditSet: (index: number, weight: number, reps: number) => void;
   onDeleteSet: (index: number) => void;
 }
 
 export default function ExerciseCard({
-  exercise, sets,
+  exercise, sets, recommendedWeight,
   onLogSet, onEditSet, onDeleteSet,
 }: Props) {
   const [weight, setWeight] = useState('');
@@ -19,6 +20,13 @@ export default function ExerciseCard({
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
   const [editWeight, setEditWeight] = useState('');
   const [editReps, setEditReps] = useState('');
+
+  // Pre-populate weight input once the recommendation loads (only if field is still empty)
+  useEffect(() => {
+    if (recommendedWeight != null && weight === '') {
+      setWeight(String(recommendedWeight));
+    }
+  }, [recommendedWeight]);
 
   const targetLabel = `${exercise.sets} × ${exercise.repLow}–${exercise.repHigh}`;
   const nextSetNum = sets.length + 1;
