@@ -10,9 +10,6 @@
   transition: border-color 0.2s;
 }
 
-.exercise-card.rated {
-  border-left-color: var(--green);
-}
 
 /* ── Header ── */
 .ex-header {
@@ -216,49 +213,3 @@
   opacity: 0.75;
 }
 
-/* ── Difficulty rating ── */
-.difficulty-section {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.difficulty-label {
-  font-size: 12px;
-  color: var(--text-muted);
-  font-weight: 500;
-}
-
-.diff-buttons {
-  display: flex;
-  gap: 8px;
-}
-
-.diff-btn {
-  flex: 1;
-  border: 1.5px solid transparent;
-  border-radius: 8px;
-  font-size: 13px;
-  font-weight: 700;
-  padding: 9px 4px;
-  cursor: pointer;
-  -webkit-tap-highlight-color: transparent;
-  transition: opacity 0.15s, border-color 0.15s;
-}
-
-.diff-btn:active {
-  opacity: 0.75;
-}
-
-/* Dim unselected buttons once a selection is made */
-.diff-buttons.has-selection .diff-btn:not(.selected) {
-  opacity: 0.35;
-}
-
-.diff-btn.selected {
-  border-color: currentColor;
-}
-
-.diff-easy { background: rgba(29, 158, 117, 0.15);  color: var(--green);  }
-.diff-medium { background: rgba(124, 114, 232, 0.18); color: var(--purple); }
-.diff-hard { background: rgba(232, 85, 85, 0.15);   color: var(--red);    }

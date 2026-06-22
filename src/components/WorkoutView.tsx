@@ -5,13 +5,9 @@ import {
   createSession,
   completeSession,
   addSetLog,
-  saveExerciseDifficulty,
   getSetLogsForSession,
-  getExerciseLogsForSession,
   deleteSetLogsForSession,
-  deleteExerciseLogsForSession,
 } from '../db/database';
-import type { Difficulty } from '../db/database';
 import ExerciseCard from './ExerciseCard';
 import './WorkoutView.css';
 
@@ -27,28 +23,17 @@ type SetEntry = { weight: number; reps: number };
 export default function WorkoutView({ day, existingSessionId, onBack, onComplete }: Props) {
   const isEditMode = existingSessionId !== undefined;
   const [sets, setSets] = useState<Record<string, SetEntry[]>>({});
-  const [difficulties, setDifficulties] = useState<Record<string, Difficulty>>({});
   const [finishing, setFinishing] = useState(false);
   const [loading, setLoading] = useState(isEditMode);
 
-  // When editing a past session, pre-populate from DB
   useEffect(() => {
     if (!existingSessionId) return;
-    Promise.all([
-      getSetLogsForSession(existingSessionId),
-      getExerciseLogsForSession(existingSessionId),
-    ]).then(([setLogs, exerciseLogs]) => {
+    getSetLogsForSession(existingSessionId).then(setLogs => {
       const groupedSets: Record<string, SetEntry[]> = {};
       for (const sl of setLogs) {
         (groupedSets[sl.exerciseId] ??= []).push({ weight: sl.weight, reps: sl.reps });
       }
       setSets(groupedSets);
-
-      const diffs: Record<string, Difficulty> = {};
-      for (const el of exerciseLogs) {
-        diffs[el.exerciseId] = el.difficulty;
-      }
-      setDifficulties(diffs);
       setLoading(false);
     });
   }, [existingSessionId]);
@@ -76,10 +61,6 @@ export default function WorkoutView({ day, existingSessionId, onBack, onComplete
     }));
   }
 
-  function handleRateDifficulty(exerciseId: string, d: Difficulty) {
-    setDifficulties(prev => ({ ...prev, [exerciseId]: d }));
-  }
-
   async function handleFinish() {
     if (finishing) return;
     setFinishing(true);
@@ -90,16 +71,12 @@ export default function WorkoutView({ day, existingSessionId, onBack, onComplete
 
     if (isEditMode) {
       await deleteSetLogsForSession(sid);
-      await deleteExerciseLogsForSession(sid);
     }
 
     for (const [exerciseId, exerciseSets] of Object.entries(sets)) {
       for (let i = 0; i < exerciseSets.length; i++) {
         await addSetLog(sid, exerciseId, i + 1, exerciseSets[i].weight, exerciseSets[i].reps);
       }
-    }
-    for (const [exerciseId, difficulty] of Object.entries(difficulties)) {
-      await saveExerciseDifficulty(sid, exerciseId, difficulty);
     }
 
     if (!isEditMode) await completeSession(sid);
@@ -139,11 +116,9 @@ export default function WorkoutView({ day, existingSessionId, onBack, onComplete
             key={ex.id}
             exercise={ex}
             sets={sets[ex.id] ?? []}
-            difficulty={difficulties[ex.id] ?? null}
             onLogSet={(w, r) => handleLogSet(ex.id, w, r)}
             onEditSet={(i, w, r) => handleEditSet(ex.id, i, w, r)}
             onDeleteSet={i => handleDeleteSet(ex.id, i)}
-            onRateDifficulty={d => handleRateDifficulty(ex.id, d)}
           />
         ))}
       </div>

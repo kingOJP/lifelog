@@ -1,27 +1,18 @@
 import { useState } from 'react';
 import type { Exercise } from '../data/program';
-import type { Difficulty } from '../db/database';
 import './ExerciseCard.css';
 
 interface Props {
   exercise: Exercise;
   sets: Array<{ weight: number; reps: number }>;
-  difficulty: Difficulty | null;
   onLogSet: (weight: number, reps: number) => void;
   onEditSet: (index: number, weight: number, reps: number) => void;
   onDeleteSet: (index: number) => void;
-  onRateDifficulty: (d: Difficulty) => void;
 }
 
-const DIFFICULTY_LABELS: Record<Difficulty, string> = {
-  easy: 'Easy',
-  medium: 'Medium',
-  hard: 'Hard',
-};
-
 export default function ExerciseCard({
-  exercise, sets, difficulty,
-  onLogSet, onEditSet, onDeleteSet, onRateDifficulty,
+  exercise, sets,
+  onLogSet, onEditSet, onDeleteSet,
 }: Props) {
   const [weight, setWeight] = useState('');
   const [reps, setReps] = useState('');
@@ -70,7 +61,7 @@ export default function ExerciseCard({
   }
 
   return (
-    <div className={`exercise-card${difficulty ? ' rated' : ''}`}>
+    <div className="exercise-card">
       <div className="ex-header">
         <span className="ex-name">{exercise.name}</span>
         <span className="ex-target">{targetLabel}</span>
@@ -157,22 +148,6 @@ export default function ExerciseCard({
         </button>
       </div>
 
-      {sets.length > 0 && (
-        <div className="difficulty-section">
-          <span className="difficulty-label">How was that?</span>
-          <div className={`diff-buttons${difficulty ? ' has-selection' : ''}`}>
-            {(['easy', 'medium', 'hard'] as Difficulty[]).map(d => (
-              <button
-                key={d}
-                className={`diff-btn diff-${d}${difficulty === d ? ' selected' : ''}`}
-                onClick={() => onRateDifficulty(d)}
-              >
-                {DIFFICULTY_LABELS[d]}
-              </button>
-            ))}
-          </div>
-        </div>
-      )}
     </div>
   );
 }
