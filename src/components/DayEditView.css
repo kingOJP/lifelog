@@ -116,6 +116,35 @@
   color: var(--text-muted);
 }
 
+.exercise-reorder-btns {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  flex-shrink: 0;
+}
+
+.exercise-reorder-btn {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-size: 11px;
+  line-height: 1;
+  padding: 3px 6px;
+  cursor: pointer;
+  border-radius: 4px;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s;
+}
+
+.exercise-reorder-btn:disabled {
+  opacity: 0.2;
+  cursor: default;
+}
+
+.exercise-reorder-btn:not(:disabled):active {
+  color: var(--purple);
+}
+
 .exercise-remove-btn {
   background: none;
   border: none;
