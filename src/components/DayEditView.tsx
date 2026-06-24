@@ -19,6 +19,18 @@ export default function DayEditView({ day, onBack, onSave }: Props) {
   const [newRepLow, setNewRepLow] = useState('8');
   const [newRepHigh, setNewRepHigh] = useState('12');
 
+  function handleMove(id: string, dir: -1 | 1) {
+    setExercises(prev => {
+      const idx = prev.findIndex(e => e.id === id);
+      if (idx < 0) return prev;
+      const next = [...prev];
+      const target = idx + dir;
+      if (target < 0 || target >= next.length) return prev;
+      [next[idx], next[target]] = [next[target], next[idx]];
+      return next;
+    });
+  }
+
   function handleRemove(id: string) {
     setExercises(prev => prev.filter(e => e.id !== id));
   }
@@ -75,11 +87,25 @@ export default function DayEditView({ day, onBack, onSave }: Props) {
         <section className="day-edit-section">
           <span className="day-edit-field-label">Exercises</span>
           <div className="exercise-edit-list">
-            {exercises.map(ex => (
+            {exercises.map((ex, idx) => (
               <div key={ex.id} className="exercise-edit-row">
                 <div className="exercise-edit-info">
                   <span className="exercise-edit-name">{ex.name}</span>
                   <span className="exercise-edit-meta">{ex.sets} sets · {ex.repLow}–{ex.repHigh} reps</span>
+                </div>
+                <div className="exercise-reorder-btns">
+                  <button
+                    className="exercise-reorder-btn"
+                    onClick={() => handleMove(ex.id, -1)}
+                    disabled={idx === 0}
+                    aria-label={`Move ${ex.name} up`}
+                  >▲</button>
+                  <button
+                    className="exercise-reorder-btn"
+                    onClick={() => handleMove(ex.id, 1)}
+                    disabled={idx === exercises.length - 1}
+                    aria-label={`Move ${ex.name} down`}
+                  >▼</button>
                 </div>
                 <button
                   className="exercise-remove-btn"
