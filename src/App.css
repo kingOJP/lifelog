@@ -7,6 +7,9 @@
 }
 
 .app-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
   padding: calc(20px + env(safe-area-inset-top)) 16px 16px;
   border-bottom: 1px solid var(--border);
 }
@@ -16,6 +19,20 @@
   font-size: 22px;
   font-weight: 700;
   letter-spacing: -0.3px;
+}
+
+.logout-btn {
+  font-size: 13px;
+  color: var(--text-muted);
+  text-decoration: none;
+  padding: 4px 8px;
+  border-radius: 6px;
+  -webkit-tap-highlight-color: transparent;
+  transition: color 0.15s;
+}
+
+.logout-btn:active {
+  color: var(--text);
 }
 
 .app-main {
