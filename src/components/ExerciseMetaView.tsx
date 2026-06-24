@@ -11,9 +11,10 @@ interface Props {
   exerciseId: string;
   exerciseName: string;
   onBack: () => void;
+  onSaved?: () => void;
 }
 
-export default function ExerciseMetaView({ exerciseId, exerciseName, onBack }: Props) {
+export default function ExerciseMetaView({ exerciseId, exerciseName, onBack, onSaved }: Props) {
   const [primaryMuscle, setPrimaryMuscle] = useState<MuscleGroup | ''>('');
   const [secondary1, setSecondary1] = useState<MuscleGroup | ''>('');
   const [secondary2, setSecondary2] = useState<MuscleGroup | ''>('');
@@ -65,6 +66,7 @@ export default function ExerciseMetaView({ exerciseId, exerciseName, onBack }: P
     ]);
     setSaving(false);
     setSaved(true);
+    onSaved?.();
     setTimeout(() => setSaved(false), 2000);
   }
 

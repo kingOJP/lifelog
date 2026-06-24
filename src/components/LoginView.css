@@ -1,0 +1,64 @@
+.login-view {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100%;
+  padding: 24px 16px;
+}
+
+.login-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  max-width: 320px;
+}
+
+.login-app-name {
+  font-size: 36px;
+  font-weight: 800;
+  color: var(--text);
+  letter-spacing: -1px;
+}
+
+.login-tagline {
+  font-size: 15px;
+  color: var(--text-muted);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.login-error {
+  font-size: 14px;
+  color: var(--red);
+  text-align: center;
+}
+
+.google-btn {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: #fff;
+  color: #3c4043;
+  border: none;
+  border-radius: 10px;
+  font-size: 15px;
+  font-weight: 600;
+  padding: 13px 20px;
+  cursor: pointer;
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: opacity 0.15s;
+}
+
+.google-btn:active {
+  opacity: 0.85;
+}
+
+.google-logo {
+  width: 20px;
+  height: 20px;
+  flex-shrink: 0;
+}

@@ -1,12 +1,15 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { WorkoutDay } from './data/program';
 import { getStoredProgram, saveStoredProgram } from './data/programStore';
+import { getLoggedInUser, pullSync, pushSync } from './data/sync';
+import type { SyncUser } from './data/sync';
 import Dashboard from './components/Dashboard';
 import WorkoutView from './components/WorkoutView';
 import HistoryView from './components/HistoryView';
 import DayEditView from './components/DayEditView';
 import ExerciseListView from './components/ExerciseListView';
 import ExerciseMetaView from './components/ExerciseMetaView';
+import LoginView from './components/LoginView';
 import './App.css';
 
 type View =
@@ -19,14 +22,44 @@ type View =
   | { screen: 'exercise-meta'; exerciseId: string; exerciseName: string };
 
 function App() {
-  const [view, setView] = useState<View>({ screen: 'dashboard' });
+  const [view, setView]       = useState<View>({ screen: 'dashboard' });
   const [program, setProgram] = useState<WorkoutDay[]>(getStoredProgram);
+  const [user]                = useState<SyncUser | null>(() => getLoggedInUser());
+
+  // On mount: pull from server if logged in; if server is empty, push local data up
+  useEffect(() => {
+    if (!user) return;
+    pullSync()
+      .then(async didPull => {
+        if (didPull) {
+          setProgram(getStoredProgram());
+        } else {
+          await pushSync();
+        }
+      })
+      .catch(console.error);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+
+  function sync() {
+    if (user) pushSync().catch(console.error);
+  }
 
   function handleUpdateDay(updated: WorkoutDay) {
     const next = program.map(d => (d.id === updated.id ? updated : d));
     setProgram(next);
     saveStoredProgram(next);
     setView({ screen: 'dashboard' });
+    sync();
+  }
+
+  const loginError = new URLSearchParams(window.location.search).get('error') ?? undefined;
+
+  if (!user) {
+    return (
+      <div className="app">
+        <LoginView error={loginError} />
+      </div>
+    );
   }
 
   if (view.screen === 'workout') {
@@ -36,7 +69,7 @@ function App() {
         <WorkoutView
           day={day}
           onBack={() => setView({ screen: 'dashboard' })}
-          onComplete={() => setView({ screen: 'dashboard' })}
+          onComplete={() => { setView({ screen: 'dashboard' }); sync(); }}
         />
       </div>
     );
@@ -64,7 +97,7 @@ function App() {
           day={day}
           existingSessionId={view.sessionId}
           onBack={() => setView({ screen: 'history' })}
-          onComplete={() => setView({ screen: 'history' })}
+          onComplete={() => { setView({ screen: 'history' }); sync(); }}
         />
       </div>
     );
@@ -103,6 +136,7 @@ function App() {
           exerciseId={view.exerciseId}
           exerciseName={view.exerciseName}
           onBack={() => setView({ screen: 'exercise-list' })}
+          onSaved={sync}
         />
       </div>
     );
@@ -112,6 +146,7 @@ function App() {
     <div className="app">
       <header className="app-header">
         <h1>LiftLog</h1>
+        <a href="/api/auth/logout" className="logout-btn">{user.name?.split(' ')[0] ?? user.email} ↩</a>
       </header>
       <main className="app-main">
         <Dashboard
