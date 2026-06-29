@@ -4,7 +4,6 @@ import { getStoredProgram, saveStoredProgram } from './data/programStore';
 import { getLoggedInUser, pullSync, pushSync } from './data/sync';
 import type { SyncUser } from './data/sync';
 import { migrateExerciseIds } from './db/database';
-import { seedExerciseData } from './data/seedExerciseData';
 import Dashboard from './components/Dashboard';
 import WorkoutView from './components/WorkoutView';
 import HistoryView from './components/HistoryView';
@@ -45,8 +44,7 @@ function App() {
       }
       try {
         const migrated = await migrateExerciseIds();
-        const seeded = await seedExerciseData();
-        if (!didPull || migrated > 0 || seeded > 0) await pushSync();
+        if (!didPull || migrated > 0) await pushSync();
       } catch (err) {
         console.error(err);
       }

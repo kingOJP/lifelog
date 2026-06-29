@@ -255,6 +255,32 @@ export async function deleteExerciseLogsForSession(sessionId: number): Promise<v
   }
 }
 
+// ── Exercise ID migration ─────────────────────────────────────────────────────
+
+const EXERCISE_ID_MIGRATIONS: Record<string, string> = {
+  'cable-lateral-raises-d1': 'cable-lateral-raises',
+  'face-pulls-d2':           'face-pulls',
+  'face-pulls-d4':           'face-pulls',
+  'lat-pulldown-d2':         'lat-pull-down',
+  'cable-pull-down-d2':      'straight-arm-pulldowns',
+  'tricep-pushdowns-d4':     'tricep-cable-pushdown',
+};
+
+export async function migrateExerciseIds(): Promise<number> {
+  const db = await openDB();
+  const logs = await idbReq<SetLog[]>(
+    db.transaction('setLogs', 'readonly').objectStore('setLogs').getAll(),
+  );
+  const toFix = logs.filter(l => EXERCISE_ID_MIGRATIONS[l.exerciseId]);
+  if (toFix.length === 0) return 0;
+
+  const store = db.transaction('setLogs', 'readwrite').objectStore('setLogs');
+  for (const log of toFix) {
+    await idbReq(store.put({ ...log, exerciseId: EXERCISE_ID_MIGRATIONS[log.exerciseId] }));
+  }
+  return toFix.length;
+}
+
 // ── Backup / restore ─────────────────────────────────────────────────────────
 
 export async function dumpIDB(): Promise<{
