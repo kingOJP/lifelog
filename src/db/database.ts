@@ -18,7 +18,7 @@ export type Equipment =
   | 'Smith Machine' | 'Pull Up Bar' | 'None';
 
 export type WeightType =
-  | 'Barbell' | 'Dumbbell' | 'Cable' | 'Machine' | 'Bodyweight'
+  | 'Barbell' | 'Dumbbell' | 'Machine' | 'Bodyweight'
   | 'EZ Bar' | 'Kettlebell' | 'Resistance Band';
 
 export const MUSCLE_GROUPS: MuscleGroup[] = [
