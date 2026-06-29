@@ -4,6 +4,7 @@ import { PROGRAM, type Exercise, type WorkoutDay } from './program';
 const PROGRAM_KEY  = 'liftlog_program';
 const LIBRARY_KEY  = 'liftlog_exercises';
 const MIGRATION_V2 = 'liftlog_library_v2';
+const MIGRATION_V3 = 'liftlog_library_v3';
 
 // IDs that existed in old builds with -d1/-d2/-d4 suffixes; now unified
 const STALE_IDS = new Set([
@@ -48,10 +49,10 @@ function buildDefaultLibrary(): Exercise[] {
   });
 }
 
-// One-time migration: remove stale duplicate IDs and rebuild from master list,
+// One-time migration: remove stale/duplicate IDs and rebuild from master list,
 // preserving any custom exercises the user added via DayEditView.
 function migrateLibraryIfNeeded(): void {
-  if (localStorage.getItem(MIGRATION_V2)) return;
+  if (localStorage.getItem(MIGRATION_V3)) return;
 
   const existing: Exercise[] = (() => {
     try {
@@ -65,6 +66,7 @@ function migrateLibraryIfNeeded(): void {
 
   saveExerciseLibrary([...buildDefaultLibrary(), ...customExercises]);
   localStorage.setItem(MIGRATION_V2, '1');
+  localStorage.setItem(MIGRATION_V3, '1');
 }
 
 export function getExerciseLibrary(): Exercise[] {
