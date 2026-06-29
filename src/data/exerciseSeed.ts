@@ -14,21 +14,17 @@ export const EXERCISE_MUSCLES_SEED: ExerciseMuscles[] = [
   { exerciseId: 'barbell-overhead-press',   primaryMuscle: 'Front Delts', secondaryMuscle1: 'Side Delts', secondaryMuscle2: 'Triceps',    secondaryMuscle3: null        },
 
   // Side Delts
-  { exerciseId: 'cable-lateral-raises-d1',  primaryMuscle: 'Side Delts', secondaryMuscle1: null,          secondaryMuscle2: null,         secondaryMuscle3: null        },
   { exerciseId: 'cable-lateral-raises',     primaryMuscle: 'Side Delts', secondaryMuscle1: null,          secondaryMuscle2: null,         secondaryMuscle3: null        },
   { exerciseId: 'dumbbell-lateral-raises',  primaryMuscle: 'Side Delts', secondaryMuscle1: null,          secondaryMuscle2: null,         secondaryMuscle3: null        },
 
   // Rear Delts
-  { exerciseId: 'face-pulls',              primaryMuscle: 'Rear Delts', secondaryMuscle1: 'Upper Back',  secondaryMuscle2: 'Traps',      secondaryMuscle3: null        },
-  { exerciseId: 'face-pulls-d2',           primaryMuscle: 'Rear Delts', secondaryMuscle1: 'Upper Back',  secondaryMuscle2: 'Traps',      secondaryMuscle3: null        },
-  { exerciseId: 'face-pulls-d4',           primaryMuscle: 'Rear Delts', secondaryMuscle1: 'Upper Back',  secondaryMuscle2: 'Traps',      secondaryMuscle3: null        },
+  { exerciseId: 'face-pulls',            primaryMuscle: 'Rear Delts', secondaryMuscle1: 'Upper Back',  secondaryMuscle2: 'Traps',      secondaryMuscle3: null        },
 
   // Upper Back
   { exerciseId: 'bent-over-db-row',         primaryMuscle: 'Upper Back', secondaryMuscle1: 'Lats',        secondaryMuscle2: 'Rear Delts', secondaryMuscle3: 'Biceps'    },
   { exerciseId: 'barbell-rows',             primaryMuscle: 'Upper Back', secondaryMuscle1: 'Lats',        secondaryMuscle2: 'Biceps',     secondaryMuscle3: null        },
 
   // Lats
-  { exerciseId: 'lat-pulldown-d2',          primaryMuscle: 'Lats',       secondaryMuscle1: 'Upper Back',  secondaryMuscle2: 'Biceps',     secondaryMuscle3: null        },
   { exerciseId: 'lat-pull-down',            primaryMuscle: 'Lats',       secondaryMuscle1: 'Upper Back',  secondaryMuscle2: 'Biceps',     secondaryMuscle3: null        },
   { exerciseId: 'cable-pull-down-d2',       primaryMuscle: 'Lats',       secondaryMuscle1: 'Upper Back',  secondaryMuscle2: null,         secondaryMuscle3: null        },
   { exerciseId: 'straight-arm-pulldowns',   primaryMuscle: 'Lats',       secondaryMuscle1: 'Upper Back',  secondaryMuscle2: null,         secondaryMuscle3: null        },
@@ -40,7 +36,6 @@ export const EXERCISE_MUSCLES_SEED: ExerciseMuscles[] = [
   // Triceps
   { exerciseId: 'overhead-tricep-ext',      primaryMuscle: 'Triceps',    secondaryMuscle1: null,          secondaryMuscle2: null,         secondaryMuscle3: null        },
   { exerciseId: 'tricep-cable-pushdown',    primaryMuscle: 'Triceps',    secondaryMuscle1: null,          secondaryMuscle2: null,         secondaryMuscle3: null        },
-  { exerciseId: 'tricep-pushdowns-d4',      primaryMuscle: 'Triceps',    secondaryMuscle1: null,          secondaryMuscle2: null,         secondaryMuscle3: null        },
   { exerciseId: 'cable-pushdown',           primaryMuscle: 'Triceps',    secondaryMuscle1: null,          secondaryMuscle2: null,         secondaryMuscle3: null        },
   { exerciseId: 'cable-kick-backs',         primaryMuscle: 'Triceps',    secondaryMuscle1: null,          secondaryMuscle2: null,         secondaryMuscle3: null        },
 
@@ -77,21 +72,17 @@ export const EXERCISE_DETAILS_SEED: ExerciseDetails[] = [
   { exerciseId: 'barbell-overhead-press',   workoutType: 'Overhead Press',  equipment: 'Squat Rack',       weightType: 'Barbell'   },
 
   // Side Delts
-  { exerciseId: 'cable-lateral-raises-d1',  workoutType: 'Lateral Raise',   equipment: 'Cable Machine',    weightType: 'Machine'     },
   { exerciseId: 'cable-lateral-raises',     workoutType: 'Lateral Raise',   equipment: 'Cable Machine',    weightType: 'Machine'     },
   { exerciseId: 'dumbbell-lateral-raises',  workoutType: 'Lateral Raise',   equipment: 'None',             weightType: 'Dumbbell'  },
 
   // Rear Delts
-  { exerciseId: 'face-pulls',              workoutType: 'Face Pull',       equipment: 'Cable Machine',    weightType: 'Machine'     },
-  { exerciseId: 'face-pulls-d2',           workoutType: 'Face Pull',       equipment: 'Cable Machine',    weightType: 'Machine'     },
-  { exerciseId: 'face-pulls-d4',           workoutType: 'Face Pull',       equipment: 'Cable Machine',    weightType: 'Machine'     },
+  { exerciseId: 'face-pulls',            workoutType: 'Face Pull',       equipment: 'Cable Machine',    weightType: 'Machine'     },
 
   // Upper Back
   { exerciseId: 'bent-over-db-row',         workoutType: 'Row',             equipment: 'None',             weightType: 'Dumbbell'  },
   { exerciseId: 'barbell-rows',             workoutType: 'Row',             equipment: 'None',             weightType: 'Barbell'   },
 
   // Lats
-  { exerciseId: 'lat-pulldown-d2',          workoutType: 'Pull Down',       equipment: 'Cable Machine',    weightType: 'Machine'     },
   { exerciseId: 'lat-pull-down',            workoutType: 'Pull Down',       equipment: 'Cable Machine',    weightType: 'Machine'     },
   { exerciseId: 'cable-pull-down-d2',       workoutType: 'Pull Down',       equipment: 'Cable Machine',    weightType: 'Machine'     },
   { exerciseId: 'straight-arm-pulldowns',   workoutType: 'Pull Down',       equipment: 'Cable Machine',    weightType: 'Machine'     },
@@ -103,7 +94,6 @@ export const EXERCISE_DETAILS_SEED: ExerciseDetails[] = [
   // Triceps
   { exerciseId: 'overhead-tricep-ext',      workoutType: 'Tricep Extension', equipment: 'Cable Machine',   weightType: 'Machine'     },
   { exerciseId: 'tricep-cable-pushdown',    workoutType: 'Tricep Extension', equipment: 'Cable Machine',   weightType: 'Machine'     },
-  { exerciseId: 'tricep-pushdowns-d4',      workoutType: 'Tricep Extension', equipment: 'Cable Machine',   weightType: 'Machine'     },
   { exerciseId: 'cable-pushdown',           workoutType: 'Tricep Extension', equipment: 'Cable Machine',   weightType: 'Machine'     },
   { exerciseId: 'cable-kick-backs',         workoutType: 'Tricep Extension', equipment: 'Cable Machine',   weightType: 'Machine'     },
 
