@@ -1,7 +1,7 @@
 import { dumpIDB } from '../db/database';
 import { getWeekNumber } from './program';
 import { getExerciseName, getExerciseLibrary } from './programStore';
-import { EXERCISE_MUSCLES_SEED, PRIMARY_MUSCLE_BY_NAME } from './exerciseSeed';
+import { EXERCISE_MAP, getExerciseMeta } from './exercises';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -62,31 +62,40 @@ function normalizeName(name: string): string {
 }
 
 // Map of exerciseId → primary muscle, in increasing precedence:
-//   1. name match against the library (catches custom timestamped IDs by name)
-//   2. the ID-keyed seed (canonical built-in exercises)
-//   3. user-set metadata from IndexedDB (an explicit override always wins)
-function buildMuscleMap(
-  overrides: { exerciseId: string; primaryMuscle: string | null }[],
-): Map<string, string> {
+//   1. name match against master list (catches custom IDs by name)
+//   2. master list ID lookup (canonical built-in exercises)
+//   3. user-saved metadata overrides from localStorage (always wins)
+function buildMuscleMap(): Map<string, string> {
   const map = new Map<string, string>();
 
+  // Name-based fallback for custom exercises
+  const nameToMuscle = new Map<string, string>();
+  for (const def of EXERCISE_MAP.values()) {
+    if (def.primaryMuscle) nameToMuscle.set(normalizeName(def.name), def.primaryMuscle);
+  }
   for (const ex of getExerciseLibrary()) {
-    const muscle = PRIMARY_MUSCLE_BY_NAME[normalizeName(ex.name)];
+    const muscle = nameToMuscle.get(normalizeName(ex.name));
     if (muscle) map.set(ex.id, muscle);
   }
-  for (const m of EXERCISE_MUSCLES_SEED) {
-    if (m.primaryMuscle) map.set(m.exerciseId, m.primaryMuscle);
+
+  // Master list wins over name match
+  for (const def of EXERCISE_MAP.values()) {
+    if (def.primaryMuscle) map.set(def.id, def.primaryMuscle);
   }
-  for (const m of overrides) {
-    if (m.primaryMuscle) map.set(m.exerciseId, m.primaryMuscle);
+
+  // User overrides win over everything
+  for (const ex of getExerciseLibrary()) {
+    const meta = getExerciseMeta(ex.id);
+    if (meta.primaryMuscle) map.set(ex.id, meta.primaryMuscle);
   }
+
   return map;
 }
 
 // ── Main ──────────────────────────────────────────────────────────────────────
 
 export async function computeMetrics(): Promise<Metrics> {
-  const { sessions, setLogs, exerciseMuscles } = await dumpIDB();
+  const { sessions, setLogs } = await dumpIDB();
 
   const completed = sessions.filter(s => s.completedAt != null);
 
@@ -109,7 +118,7 @@ export async function computeMetrics(): Promise<Metrics> {
     else setsBySession.set(log.sessionId, [log]);
   }
 
-  const muscleMap = buildMuscleMap(exerciseMuscles);
+  const muscleMap = buildMuscleMap();
 
   // ── Weekly volume + totals ──
   const weekBuckets = new Map<number, { value: number; latestTs: number }>();
