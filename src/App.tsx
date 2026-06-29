@@ -3,6 +3,7 @@ import type { WorkoutDay } from './data/program';
 import { getStoredProgram, saveStoredProgram } from './data/programStore';
 import { getLoggedInUser, pullSync, pushSync } from './data/sync';
 import type { SyncUser } from './data/sync';
+import { migrateExerciseIds } from './db/database';
 import Dashboard from './components/Dashboard';
 import WorkoutView from './components/WorkoutView';
 import HistoryView from './components/HistoryView';
@@ -28,18 +29,20 @@ function App() {
   const [program, setProgram] = useState<WorkoutDay[]>(getStoredProgram);
   const [user]                = useState<SyncUser | null>(() => getLoggedInUser());
 
-  // On mount: pull from server if logged in; if server is empty, push local data up
+  // On mount: pull from server if logged in; if server is empty, push local data up.
+  // Run the exercise-ID migration after pulling so any remapped logs sync back up.
   useEffect(() => {
     if (!user) return;
-    pullSync()
-      .then(async didPull => {
-        if (didPull) {
-          setProgram(getStoredProgram());
-        } else {
-          await pushSync();
-        }
-      })
-      .catch(console.error);
+    (async () => {
+      try {
+        const didPull = await pullSync();
+        const migrated = await migrateExerciseIds();
+        if (didPull) setProgram(getStoredProgram());
+        if (!didPull || migrated > 0) await pushSync();
+      } catch (err) {
+        console.error(err);
+      }
+    })();
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   function sync() {
