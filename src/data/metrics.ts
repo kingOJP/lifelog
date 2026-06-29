@@ -1,7 +1,7 @@
 import { dumpIDB } from '../db/database';
 import { getWeekNumber } from './program';
-import { getExerciseName } from './programStore';
-import { EXERCISE_MUSCLES_SEED } from './exerciseSeed';
+import { getExerciseName, getExerciseLibrary } from './programStore';
+import { EXERCISE_MUSCLES_SEED, PRIMARY_MUSCLE_BY_NAME } from './exerciseSeed';
 
 // ── Types ─────────────────────────────────────────────────────────────────────
 
@@ -55,12 +55,24 @@ function shortDate(ts: number): string {
   return new Date(ts).toLocaleDateString('en-US', { month: 'numeric', day: 'numeric' });
 }
 
-// Static map of exerciseId → primary muscle, from the seed. User-set metadata
-// (from IndexedDB) is overlaid on top so custom exercises are still counted.
+// Lowercase, strip punctuation, collapse whitespace — for name-based matching
+function normalizeName(name: string): string {
+  return name.toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
+}
+
+// Map of exerciseId → primary muscle, in increasing precedence:
+//   1. name match against the library (catches custom timestamped IDs by name)
+//   2. the ID-keyed seed (canonical built-in exercises)
+//   3. user-set metadata from IndexedDB (an explicit override always wins)
 function buildMuscleMap(
   overrides: { exerciseId: string; primaryMuscle: string | null }[],
 ): Map<string, string> {
   const map = new Map<string, string>();
+
+  for (const ex of getExerciseLibrary()) {
+    const muscle = PRIMARY_MUSCLE_BY_NAME[normalizeName(ex.name)];
+    if (muscle) map.set(ex.id, muscle);
+  }
   for (const m of EXERCISE_MUSCLES_SEED) {
     if (m.primaryMuscle) map.set(m.exerciseId, m.primaryMuscle);
   }

@@ -1,4 +1,4 @@
-import type { ExerciseMuscles, ExerciseDetails } from '../db/database';
+import type { ExerciseMuscles, ExerciseDetails, MuscleGroup } from '../db/database';
 
 // Fill in null values and call seedExerciseData() once to populate IndexedDB.
 // Existing records are never overwritten — safe to run multiple times.
@@ -31,7 +31,8 @@ export const EXERCISE_MUSCLES_SEED: ExerciseMuscles[] = [
   { exerciseId: 'weighted-pull-ups',        primaryMuscle: 'Lats',       secondaryMuscle1: 'Upper Back',  secondaryMuscle2: 'Biceps',     secondaryMuscle3: null        },
 
   // Lower Back
-  { exerciseId: 'back-extensions',          primaryMuscle: 'Lower Back', secondaryMuscle1: 'Glutes',      secondaryMuscle2: null,         secondaryMuscle3: null        },
+  { exerciseId: 'back-extensions',          primaryMuscle: 'Lower Back', secondaryMuscle1: 'Glutes',      secondaryMuscle2: 'Hamstrings', secondaryMuscle3: null        },
+  { exerciseId: 'deadlifts',                primaryMuscle: 'Lower Back', secondaryMuscle1: 'Hamstrings',  secondaryMuscle2: 'Glutes',     secondaryMuscle3: 'Traps'     },
 
   // Triceps
   { exerciseId: 'overhead-tricep-ext',      primaryMuscle: 'Triceps',    secondaryMuscle1: null,          secondaryMuscle2: null,         secondaryMuscle3: null        },
@@ -49,16 +50,20 @@ export const EXERCISE_MUSCLES_SEED: ExerciseMuscles[] = [
   // Quads
   { exerciseId: 'leg-press',                primaryMuscle: 'Quads',      secondaryMuscle1: 'Glutes',      secondaryMuscle2: 'Hamstrings', secondaryMuscle3: null        },
   { exerciseId: 'leg-extension',            primaryMuscle: 'Quads',      secondaryMuscle1: null,          secondaryMuscle2: null,         secondaryMuscle3: null        },
+  { exerciseId: 'jefferson-split-squats',   primaryMuscle: 'Quads',      secondaryMuscle1: 'Glutes',      secondaryMuscle2: 'Hamstrings', secondaryMuscle3: null        },
 
   // Hamstrings
   { exerciseId: 'romanian-deadlifts',       primaryMuscle: 'Hamstrings', secondaryMuscle1: 'Glutes',      secondaryMuscle2: 'Lower Back', secondaryMuscle3: null        },
 
   // Glutes
-  { exerciseId: 'hip-thrusts',              primaryMuscle: 'Glutes',     secondaryMuscle1: 'Hamstrings',  secondaryMuscle2: null,         secondaryMuscle3: null        },
+  { exerciseId: 'hip-thrusts',              primaryMuscle: 'Glutes',     secondaryMuscle1: 'Hamstrings',  secondaryMuscle2: 'Lower Back', secondaryMuscle3: null        },
 
   // Calves
   { exerciseId: 'seated-calf-raises',       primaryMuscle: 'Calves',     secondaryMuscle1: null,          secondaryMuscle2: null,         secondaryMuscle3: null        },
   { exerciseId: 'standing-calf-raises',     primaryMuscle: 'Calves',     secondaryMuscle1: null,          secondaryMuscle2: null,         secondaryMuscle3: null        },
+
+  // Abs
+  { exerciseId: 'dead-bugs',                primaryMuscle: 'Abs',        secondaryMuscle1: 'Lower Back',  secondaryMuscle2: null,         secondaryMuscle3: null        },
 ];
 
 export const EXERCISE_DETAILS_SEED: ExerciseDetails[] = [
@@ -90,6 +95,7 @@ export const EXERCISE_DETAILS_SEED: ExerciseDetails[] = [
 
   // Lower Back
   { exerciseId: 'back-extensions',          workoutType: 'Hip Hinge',       equipment: 'None',             weightType: 'Bodyweight'},
+  { exerciseId: 'deadlifts',                workoutType: 'Hip Hinge',       equipment: 'Squat Rack',       weightType: 'Barbell'   },
 
   // Triceps
   { exerciseId: 'overhead-tricep-ext',      workoutType: 'Tricep Extension', equipment: 'Cable Machine',   weightType: 'Machine'     },
@@ -107,6 +113,7 @@ export const EXERCISE_DETAILS_SEED: ExerciseDetails[] = [
   // Quads
   { exerciseId: 'leg-press',                workoutType: 'Leg Press',       equipment: 'Leg Press Machine', weightType: 'Machine'  },
   { exerciseId: 'leg-extension',            workoutType: 'Leg Extension',   equipment: 'Leg Press Machine', weightType: 'Machine'  },
+  { exerciseId: 'jefferson-split-squats',   workoutType: 'Squat',           equipment: 'None',             weightType: 'Dumbbell'  },
 
   // Hamstrings
   { exerciseId: 'romanian-deadlifts',       workoutType: 'Hip Hinge',       equipment: 'None',             weightType: 'Barbell'   },
@@ -117,4 +124,20 @@ export const EXERCISE_DETAILS_SEED: ExerciseDetails[] = [
   // Calves
   { exerciseId: 'seated-calf-raises',       workoutType: 'Calf Raise',      equipment: 'None',             weightType: 'Machine'   },
   { exerciseId: 'standing-calf-raises',     workoutType: 'Calf Raise',      equipment: 'None',             weightType: 'Barbell'   },
+
+  // Abs
+  { exerciseId: 'dead-bugs',                workoutType: null,              equipment: 'None',             weightType: 'Bodyweight'},
 ];
+
+// Name-based primary-muscle fallback. Custom exercises added in-app get unique
+// timestamped IDs (e.g. "deadlifts-1718…") that won't match the ID-keyed seed
+// above, so the metrics muscle breakdown also resolves by normalized name.
+// Keys must be lowercase with single spaces (see normalizeName in metrics.ts).
+export const PRIMARY_MUSCLE_BY_NAME: Record<string, MuscleGroup> = {
+  'jefferson split squats': 'Quads',
+  'dead bugs':              'Abs',
+  'back extensions':        'Lower Back',
+  'deadlifts':              'Lower Back',
+  'standing calf raises':   'Calves',
+  'hip thrusts':            'Glutes',
+};
