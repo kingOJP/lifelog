@@ -10,6 +10,7 @@ import {
   getLastCompletedSessionForDay,
 } from '../db/database';
 import { calculateRecommendedWeight } from '../data/recommendations';
+import { savePendingSession } from '../data/pendingSessions';
 import ExerciseCard from './ExerciseCard';
 import './WorkoutView.css';
 
@@ -83,9 +84,10 @@ export default function WorkoutView({ day, existingSessionId, onBack, onComplete
     if (finishing) return;
     setFinishing(true);
 
+    const startedAt = Date.now();
     const sid = isEditMode
       ? existingSessionId
-      : await createSession(day.id, getWeekNumber());
+      : await createSession(day.id, getWeekNumber(), startedAt);
 
     if (isEditMode) {
       await deleteSetLogsForSession(sid);
@@ -97,7 +99,19 @@ export default function WorkoutView({ day, existingSessionId, onBack, onComplete
       }
     }
 
-    if (!isEditMode) await completeSession(sid);
+    if (!isEditMode) {
+      const completedAt = Date.now();
+      await completeSession(sid, completedAt);
+      savePendingSession({
+        startedAt,
+        completedAt,
+        dayId: day.id,
+        weekNumber: getWeekNumber(),
+        setLogs: Object.entries(sets).flatMap(([exerciseId, exerciseSets]) =>
+          exerciseSets.map((s, i) => ({ exerciseId, setNumber: i + 1, weight: s.weight, reps: s.reps }))
+        ),
+      });
+    }
     onComplete();
   }
 

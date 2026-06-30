@@ -1,5 +1,6 @@
-import { dumpIDB, restoreIDB } from '../db/database';
+import { dumpIDB, restoreIDB, createSession, completeSession, addSetLog } from '../db/database';
 import type { Session, SetLog, ExerciseLog } from '../db/database';
+import { getPendingSessions, clearPendingSessions } from './pendingSessions';
 import { getStoredProgram, saveStoredProgram, getExerciseLibrary, saveExerciseLibrary } from './programStore';
 import type { WorkoutDay, Exercise } from './program';
 
@@ -47,6 +48,7 @@ export async function pushSync(): Promise<void> {
 
   if (res.status === 401) return;
   if (!res.ok) throw new Error(`Sync push failed: ${res.status}`);
+  clearPendingSessions();
 }
 
 // Returns true if server had data and local state was updated
@@ -71,6 +73,21 @@ export async function pullSync(): Promise<boolean> {
     setLogs:      data.setLogs,
     exerciseLogs: data.exerciseLogs,
   });
+
+  // Re-apply any locally saved sessions not yet confirmed by the server
+  const pending = getPendingSessions();
+  if (pending.length > 0) {
+    const pulledStartedAts = new Set(data.sessions.map(s => s.startedAt));
+    for (const p of pending) {
+      if (!pulledStartedAts.has(p.startedAt)) {
+        const sid = await createSession(p.dayId, p.weekNumber, p.startedAt);
+        for (const sl of p.setLogs) {
+          await addSetLog(sid, sl.exerciseId, sl.setNumber, sl.weight, sl.reps);
+        }
+        await completeSession(sid, p.completedAt);
+      }
+    }
+  }
 
   if (data.program)   saveStoredProgram(data.program);
   if (data.exercises) saveExerciseLibrary(data.exercises);

@@ -117,21 +117,21 @@ function openDB(): Promise<IDBDatabase> {
   });
 }
 
-export async function createSession(dayId: number, weekNumber: number): Promise<number> {
+export async function createSession(dayId: number, weekNumber: number, startedAt = Date.now()): Promise<number> {
   const db = await openDB();
   const id = await idbReq(
     db.transaction('sessions', 'readwrite').objectStore('sessions').add({
-      dayId, weekNumber, startedAt: Date.now(),
+      dayId, weekNumber, startedAt,
     } as Session),
   );
   return id as number;
 }
 
-export async function completeSession(sessionId: number): Promise<void> {
+export async function completeSession(sessionId: number, completedAt = Date.now()): Promise<void> {
   const db = await openDB();
   const store = db.transaction('sessions', 'readonly').objectStore('sessions');
   const session = await idbReq<Session>(store.get(sessionId));
-  session.completedAt = Date.now();
+  session.completedAt = completedAt;
   await idbReq(db.transaction('sessions', 'readwrite').objectStore('sessions').put(session));
 }
 
