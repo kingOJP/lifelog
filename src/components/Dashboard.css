@@ -28,20 +28,97 @@
   gap: 12px;
 }
 
-.history-btn {
+/* ── Coach card ── */
+.coach-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  text-align: left;
   width: 100%;
-  background: none;
-  border: 1px solid var(--border);
-  border-radius: 10px;
+  background: linear-gradient(135deg, rgba(124, 114, 232, 0.18), rgba(124, 114, 232, 0.04));
+  border: 1px solid var(--purple-dim);
+  border-radius: 14px;
+  padding: 14px 16px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+  transition: transform 0.1s, border-color 0.15s;
+}
+
+.coach-card:active {
+  transform: scale(0.99);
+  border-color: var(--purple);
+}
+
+.coach-eyebrow {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  color: var(--purple);
+}
+
+.coach-day {
+  font-size: 17px;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.coach-insight {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  margin-top: 8px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: rgba(0, 0, 0, 0.25);
+  border-left: 3px solid var(--text-muted);
+}
+
+.coach-insight--volume-low,
+.coach-insight--plateau { border-left-color: var(--red); }
+.coach-insight--volume-high { border-left-color: var(--purple); }
+.coach-insight--progress { border-left-color: var(--green); }
+
+.coach-insight-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+}
+
+.coach-insight-detail {
+  font-size: 12px;
   color: var(--text-muted);
-  font-size: 14px;
-  font-weight: 500;
-  padding: 12px;
+}
+
+/* ── Bottom nav ── */
+.dash-nav {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.dash-nav-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 600;
+  padding: 14px 8px;
   cursor: pointer;
   -webkit-tap-highlight-color: transparent;
   transition: background 0.15s;
 }
 
-.history-btn:active {
-  background: var(--bg-card);
+.dash-nav-btn:active {
+  background: var(--bg-input);
+}
+
+.dash-nav-icon {
+  font-size: 20px;
+  line-height: 1;
 }

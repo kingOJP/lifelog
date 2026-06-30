@@ -1,18 +1,25 @@
 import { useState, useEffect } from 'react';
 import type { Exercise } from '../data/program';
+import type { WeightRec } from '../data/recommendations';
 import './ExerciseCard.css';
 
 interface Props {
   exercise: Exercise;
   sets: Array<{ weight: number; reps: number }>;
-  recommendedWeight?: number;
+  recommendation?: WeightRec;
   onLogSet: (weight: number, reps: number) => void;
   onEditSet: (index: number, weight: number, reps: number) => void;
   onDeleteSet: (index: number) => void;
 }
 
+const DIRECTION_ICON: Record<WeightRec['direction'], string> = {
+  up: '↑',
+  down: '↓',
+  hold: '→',
+};
+
 export default function ExerciseCard({
-  exercise, sets, recommendedWeight,
+  exercise, sets, recommendation,
   onLogSet, onEditSet, onDeleteSet,
 }: Props) {
   const [weight, setWeight] = useState('');
@@ -23,10 +30,10 @@ export default function ExerciseCard({
 
   // Pre-populate weight input once the recommendation loads (only if field is still empty)
   useEffect(() => {
-    if (recommendedWeight != null && weight === '') {
-      setWeight(String(recommendedWeight));
+    if (recommendation != null && weight === '') {
+      setWeight(String(recommendation.weight));
     }
-  }, [recommendedWeight]);
+  }, [recommendation]);
 
   const targetLabel = `${exercise.sets} × ${exercise.repLow}–${exercise.repHigh}`;
   const nextSetNum = sets.length + 1;
@@ -74,6 +81,15 @@ export default function ExerciseCard({
         <span className="ex-name">{exercise.name}</span>
         <span className="ex-target">{targetLabel}</span>
       </div>
+
+      {recommendation && (
+        <div className={`ex-rec ex-rec--${recommendation.direction}`}>
+          <span className="ex-rec-weight">
+            {DIRECTION_ICON[recommendation.direction]} {recommendation.weight} lbs
+          </span>
+          <span className="ex-rec-reason">{recommendation.reason}</span>
+        </div>
+      )}
 
       {sets.length > 0 && (
         <div className="set-log">

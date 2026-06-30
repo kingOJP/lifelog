@@ -9,9 +9,11 @@ import {
   deleteSetLogsForSession,
   getLastCompletedSessionForDay,
 } from '../db/database';
-import { calculateRecommendedWeight } from '../data/recommendations';
+import { calculateRecommendation } from '../data/recommendations';
+import type { WeightRec } from '../data/recommendations';
 import { savePendingSession } from '../data/pendingSessions';
 import ExerciseCard from './ExerciseCard';
+import RestTimer from './RestTimer';
 import './WorkoutView.css';
 
 interface Props {
@@ -26,22 +28,24 @@ type SetEntry = { weight: number; reps: number };
 export default function WorkoutView({ day, existingSessionId, onBack, onComplete }: Props) {
   const isEditMode = existingSessionId !== undefined;
   const [sets, setSets] = useState<Record<string, SetEntry[]>>({});
-  const [recommendedWeights, setRecommendedWeights] = useState<Record<string, number>>({});
+  const [recommendations, setRecommendations] = useState<Record<string, WeightRec>>({});
   const [finishing, setFinishing] = useState(false);
   const [loading, setLoading] = useState(isEditMode);
+  // Increments on every logged set to (re)start the rest timer. Edit mode skips it.
+  const [restRunId, setRestRunId] = useState(0);
 
   useEffect(() => {
     if (isEditMode) return;
     getLastCompletedSessionForDay(day.id).then(async session => {
       if (!session?.id) return;
       const setLogs = await getSetLogsForSession(session.id);
-      const recs: Record<string, number> = {};
+      const recs: Record<string, WeightRec> = {};
       for (const ex of day.exercises) {
         const exSets = setLogs.filter(s => s.exerciseId === ex.id);
-        const rec = calculateRecommendedWeight(exSets, ex);
+        const rec = calculateRecommendation(exSets, ex);
         if (rec != null) recs[ex.id] = rec;
       }
-      setRecommendedWeights(recs);
+      setRecommendations(recs);
     });
   }, [day.id, isEditMode]);
 
@@ -62,6 +66,7 @@ export default function WorkoutView({ day, existingSessionId, onBack, onComplete
       ...prev,
       [exerciseId]: [...(prev[exerciseId] ?? []), { weight, reps }],
     }));
+    if (!isEditMode) setRestRunId(id => id + 1);
   }
 
   function handleEditSet(exerciseId: string, index: number, weight: number, reps: number) {
@@ -142,19 +147,24 @@ export default function WorkoutView({ day, existingSessionId, onBack, onComplete
         </div>
       </header>
 
-      <div className="exercise-list">
+      <div
+        className="exercise-list"
+        style={restRunId > 0 ? { paddingBottom: 'calc(160px + env(safe-area-inset-bottom))' } : undefined}
+      >
         {day.exercises.map(ex => (
           <ExerciseCard
             key={ex.id}
             exercise={ex}
             sets={sets[ex.id] ?? []}
-            recommendedWeight={recommendedWeights[ex.id]}
+            recommendation={recommendations[ex.id]}
             onLogSet={(w, r) => handleLogSet(ex.id, w, r)}
             onEditSet={(i, w, r) => handleEditSet(ex.id, i, w, r)}
             onDeleteSet={i => handleDeleteSet(ex.id, i)}
           />
         ))}
       </div>
+
+      {!isEditMode && <RestTimer runId={restRunId} onDismiss={() => setRestRunId(0)} />}
 
       <div className="finish-bar">
         <button
