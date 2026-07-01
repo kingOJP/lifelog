@@ -177,7 +177,7 @@ function App() {
   if (view.screen === 'metrics') {
     return (
       <div className="app">
-        <MetricsView onBack={() => setView({ screen: 'dashboard' })} />
+        <MetricsView program={program} onBack={() => setView({ screen: 'dashboard' })} />
       </div>
     );
   }

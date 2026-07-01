@@ -1,23 +1,24 @@
 import { useState, useEffect } from 'react';
+import type { WorkoutDay } from '../data/program';
 import { computeMetrics } from '../data/metrics';
 import type { Metrics } from '../data/metrics';
+import { computeCoaching, SETS_TARGET_LOW, SETS_TARGET_HIGH } from '../data/insights';
+import type { Coaching } from '../data/insights';
 import { BarChart, LineChart } from './charts';
 import './MetricsView.css';
 
 interface Props {
+  program: WorkoutDay[];
   onBack: () => void;
 }
-
-// Hypertrophy research suggests ~10–20 hard sets per muscle per week
-const SETS_TARGET_LOW = 10;
-const SETS_TARGET_HIGH = 20;
 
 function formatVolume(v: number): string {
   return v.toLocaleString('en-US');
 }
 
-export default function MetricsView({ onBack }: Props) {
+export default function MetricsView({ program, onBack }: Props) {
   const [metrics, setMetrics] = useState<Metrics | null>(null);
+  const [coaching, setCoaching] = useState<Coaching | null>(null);
   const [selectedExercise, setSelectedExercise] = useState<string>('');
 
   useEffect(() => {
@@ -25,7 +26,8 @@ export default function MetricsView({ onBack }: Props) {
       setMetrics(m);
       if (m.exercises.length > 0) setSelectedExercise(m.exercises[0].exerciseId);
     });
-  }, []);
+    computeCoaching(program).then(setCoaching);
+  }, [program]);
 
   const selected = metrics?.exercises.find(e => e.exerciseId === selectedExercise);
   const maxMuscleSets = Math.max(...(metrics?.muscleSets.map(m => m.sets) ?? [0]), SETS_TARGET_HIGH);
@@ -46,6 +48,22 @@ export default function MetricsView({ onBack }: Props) {
 
         {metrics && metrics.hasData && (
           <>
+            {/* ── Coaching insights ── */}
+            {coaching && coaching.insights.length > 0 && (
+              <section className="metric-section">
+                <h2 className="metric-heading">Coach</h2>
+                <p className="metric-sub">Data-driven nudges from your logged sets · {coaching.weekLabel}.</p>
+                <div className="coach-insight-list">
+                  {coaching.insights.map((ins, i) => (
+                    <div key={i} className={`coach-insight-item coach-insight--${ins.kind}`}>
+                      <span className="coach-insight-title">{ins.title}</span>
+                      <span className="coach-insight-detail">{ins.detail}</span>
+                    </div>
+                  ))}
+                </div>
+              </section>
+            )}
+
             {/* ── Summary stats ── */}
             <div className="stat-grid">
               <div className="stat-card">

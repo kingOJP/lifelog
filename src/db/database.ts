@@ -150,28 +150,29 @@ export async function addSetLog(
   );
 }
 
-export async function saveExerciseDifficulty(
+export async function getSession(sessionId: number): Promise<Session | undefined> {
+  const db = await openDB();
+  return idbReq<Session | undefined>(
+    db.transaction('sessions', 'readonly').objectStore('sessions').get(sessionId),
+  );
+}
+
+// Move a completed session to a new date. weekNumber is recomputed by the caller
+// (which owns PROGRAM_START) so weekly metrics bucket the session correctly.
+export async function updateSessionDate(
   sessionId: number,
-  exerciseId: string,
-  difficulty: Difficulty,
+  completedAt: number,
+  weekNumber: number,
 ): Promise<void> {
   const db = await openDB();
-
-  // Read in one transaction, write in another — avoids IDB transaction auto-commit issues
-  const all = await idbReq<ExerciseLog[]>(
-    db.transaction('exerciseLogs', 'readonly')
-      .objectStore('exerciseLogs')
-      .index('sessionId')
-      .getAll(sessionId),
+  const session = await idbReq<Session | undefined>(
+    db.transaction('sessions', 'readonly').objectStore('sessions').get(sessionId),
   );
-  const existing = all.find(e => e.exerciseId === exerciseId);
-
-  const writeStore = db.transaction('exerciseLogs', 'readwrite').objectStore('exerciseLogs');
-  if (existing) {
-    await idbReq(writeStore.put({ ...existing, difficulty }));
-  } else {
-    await idbReq(writeStore.add({ sessionId, exerciseId, difficulty } as ExerciseLog));
-  }
+  if (!session) return;
+  session.completedAt = completedAt;
+  session.startedAt = Math.min(session.startedAt, completedAt);
+  session.weekNumber = weekNumber;
+  await idbReq(db.transaction('sessions', 'readwrite').objectStore('sessions').put(session));
 }
 
 export async function getCompletedSessionsForWeek(weekNumber: number): Promise<Session[]> {
@@ -215,16 +216,6 @@ export async function getSetLogsForSession(sessionId: number): Promise<SetLog[]>
   );
 }
 
-export async function getExerciseLogsForSession(sessionId: number): Promise<ExerciseLog[]> {
-  const db = await openDB();
-  return idbReq<ExerciseLog[]>(
-    db.transaction('exerciseLogs', 'readonly')
-      .objectStore('exerciseLogs')
-      .index('sessionId')
-      .getAll(sessionId),
-  );
-}
-
 export async function deleteSetLogsForSession(sessionId: number): Promise<void> {
   const db = await openDB();
   const logs = await idbReq<SetLog[]>(
@@ -235,21 +226,6 @@ export async function deleteSetLogsForSession(sessionId: number): Promise<void> 
   );
   if (logs.length === 0) return;
   const store = db.transaction('setLogs', 'readwrite').objectStore('setLogs');
-  for (const log of logs) {
-    await idbReq(store.delete(log.id!));
-  }
-}
-
-export async function deleteExerciseLogsForSession(sessionId: number): Promise<void> {
-  const db = await openDB();
-  const logs = await idbReq<ExerciseLog[]>(
-    db.transaction('exerciseLogs', 'readonly')
-      .objectStore('exerciseLogs')
-      .index('sessionId')
-      .getAll(sessionId),
-  );
-  if (logs.length === 0) return;
-  const store = db.transaction('exerciseLogs', 'readwrite').objectStore('exerciseLogs');
   for (const log of logs) {
     await idbReq(store.delete(log.id!));
   }

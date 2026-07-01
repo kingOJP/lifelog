@@ -32,6 +32,37 @@
   white-space: nowrap;
 }
 
+/* ── Recommendation chip ── */
+.ex-rec {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 8px 10px;
+  border-radius: 8px;
+  background: var(--bg-input);
+  border-left: 3px solid var(--text-muted);
+}
+
+.ex-rec--up    { border-left-color: var(--green); }
+.ex-rec--down  { border-left-color: var(--red); }
+.ex-rec--hold  { border-left-color: var(--purple); }
+
+.ex-rec-weight {
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+}
+
+.ex-rec--up   .ex-rec-weight { color: var(--green); }
+.ex-rec--down .ex-rec-weight { color: var(--red); }
+
+.ex-rec-reason {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
 /* ── Logged sets list ── */
 .set-log {
   display: flex;
