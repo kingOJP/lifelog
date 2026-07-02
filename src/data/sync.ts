@@ -56,6 +56,11 @@ export async function pullSync(): Promise<boolean> {
   const res = await fetch('/api/sync');
   if (res.status === 401) return false;
   if (!res.ok) throw new Error(`Sync pull failed: ${res.status}`);
+  // Guard against non-API responses served with a 200 (dev server fallback,
+  // captive portals, misbehaving proxies) — never parse HTML as sync data.
+  if (!res.headers.get('content-type')?.includes('application/json')) {
+    throw new Error('Sync pull failed: non-JSON response');
+  }
 
   const data = await res.json() as {
     sessions:     Session[];

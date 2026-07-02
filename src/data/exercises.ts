@@ -1,4 +1,4 @@
-import type { MuscleGroup, WorkoutType, Equipment, WeightType } from '../db/database';
+import type { MuscleGroup, WorkoutType, Equipment, WeightType } from './taxonomy';
 
 export interface ExerciseDef {
   id: string;
